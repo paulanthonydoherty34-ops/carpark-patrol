@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Foyleside Car Park — Patrol Log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0a;
+    --card: #111412;
+    --card-border: #1e2a1e;
+    --card-hover: #151a15;
+    --green: #00e676;
+    --green-dim: #00c853;
+    --green-dark: #003d1a;
+    --green-glow: rgba(0,230,118,0.08);
+    --amber: #ffd740;
+    --red: #ff5252;
+    --red-dark: #3d0000;
+    --text: #e8f5e9;
+    --text-muted: #6a7d6a;
+    --text-dim: #3a4d3a;
+    --mono: 'Share Tech Mono', monospace;
+    --display: 'Rajdhani', sans-serif;
+  }
+
+  body {
+    font-family: var(--mono);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 4rem;
+  }
+
+  /* Header — matches dashboard */
+  header {
+    background: #0d0d0d;
+    border-bottom: 1px solid #1a2a1a;
+    padding: 0.85rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+
+  .brand {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 22px;
+    color: var(--green);
+    letter-spacing: 0.08em;
+    line-height: 1;
+  }
+
+  .brand-sub {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.12em;
+    margin-top: 3px;
+    text-transform: uppercase;
+  }
+
+  .header-clock {
+    text-align: right;
+  }
+
+  .clock-time {
+    font-family: var(--display);
+    font-size: 28px;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1;
+  }
+
+  .clock-date {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  /* Status bar */
+  .status-bar {
+    background: #0d100d;
+    border-bottom: 1px solid #151f15;
+    padding: 6px 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+  }
+
+  .status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+    flex-shrink: 0;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  main {
+    max-width: 540px;
+    margin: 0 auto;
+    padding: 1.25rem 1rem;
+  }
+
+  /* Cards */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 6px;
+    padding: 1.1rem 1.25rem;
+    margin-bottom: 10px;
+    transition: border-color 0.2s;
+  }
+
+  .card:focus-within {
+    border-color: #2a4a2a;
+  }
+
+  .card-label {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .card-label svg {
+    width: 13px;
+    height: 13px;
+    color: var(--green);
+    flex-shrink: 0;
+  }
+
+  /* Form elements */
+  select, input[type="text"], textarea {
+    width: 100%;
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--text);
+    background: #0d100d;
+    border: 1px solid #1a2a1a;
+    border-radius: 4px;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color 0.15s;
+    appearance: none;
+    -webkit-appearance: none;
+    caret-color: var(--green);
+  }
+
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2300e676' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-color: #0d100d;
+    padding-right: 34px;
+  }
+
+  select:focus, input[type="text"]:focus, textarea:focus {
+    border-color: var(--green);
+    box-shadow: 0 0 0 1px rgba(0,230,118,0.15);
+  }
+
+  select option { background: #111412; }
+  select optgroup { color: var(--green); }
+
+  textarea {
+    resize: vertical;
+    min-height: 85px;
+    line-height: 1.6;
+  }
+
+  textarea::placeholder, input::placeholder {
+    color: var(--text-dim);
+  }
+
+  .field-gap { margin-bottom: 10px; }
+  .field-gap:last-child { margin-bottom: 0; }
+
+  #other-name-wrap {
+    margin-top: 8px;
+    display: none;
+  }
+
+  /* Condition buttons */
+  .condition-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+
+  .cond {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+    padding: 14px 6px;
+    border: 1px solid #1e2a1e;
+    border-radius: 4px;
+    background: #0d100d;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: center;
+    line-height: 1.3;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    letter-spacing: 0.03em;
+  }
+
+  .cond svg { width: 20px; height: 20px; transition: filter 0.15s; }
+  .cond:active { transform: scale(0.97); }
+
+  .cond.ok {
+    border-color: var(--green);
+    background: var(--green-dark);
+    color: var(--green);
+    box-shadow: 0 0 12px rgba(0,230,118,0.1);
+  }
+
+  .cond.warn {
+    border-color: var(--amber);
+    background: #2a2000;
+    color: var(--amber);
+    box-shadow: 0 0 12px rgba(255,215,64,0.1);
+  }
+
+  .cond.danger {
+    border-color: var(--red);
+    background: var(--red-dark);
+    color: var(--red);
+    box-shadow: 0 0 12px rgba(255,82,82,0.12);
+  }
+
+  /* Photo */
+  .photo-zone {
+    position: relative;
+    border: 1px dashed #1e3a1e;
+    border-radius: 4px;
+    padding: 1.25rem 1rem;
+    text-align: center;
+    cursor: pointer;
+    background: #0d100d;
+    transition: border-color 0.15s, background 0.15s;
+  }
+
+  .photo-zone:hover { border-color: var(--green); background: #0d120d; }
+
+  .photo-zone input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+
+  .photo-zone svg {
+    width: 28px;
+    height: 28px;
+    color: var(--text-dim);
+    display: block;
+    margin: 0 auto 8px;
+  }
+
+  .photo-zone p { font-size: 13px; color: var(--text-muted); }
+  .photo-zone small { font-size: 11px; color: var(--text-dim); display: block; margin-top: 3px; }
+
+  #preview-wrap { display: none; margin-top: 10px; }
+  #preview-img { width: 100%; border-radius: 4px; max-height: 200px; object-fit: cover; display: block; border: 1px solid #1e2a1e; }
+  #remove-photo {
+    font-size: 11px;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px 0 0;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--mono);
+  }
+
+  /* Submit */
+  .submit-btn {
+    width: 100%;
+    padding: 15px;
+    background: var(--green-dark);
+    border: 1px solid var(--green);
+    border-radius: 4px;
+    font-family: var(--display);
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--green);
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .submit-btn:hover {
+    background: #004d20;
+    box-shadow: 0 0 20px rgba(0,230,118,0.15);
+  }
+
+  .submit-btn:active { transform: scale(0.99); }
+
+  .submit-btn:disabled {
+    border-color: var(--text-dim);
+    color: var(--text-dim);
+    background: #0d100d;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  .spinner {
+    display: none;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(0,230,118,0.2);
+    border-top-color: var(--green);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  @keyframes spin { to { transform: translateY(-50%) rotate(360deg); } }
+
+  /* Error */
+  .error-banner {
+    display: none;
+    background: var(--red-dark);
+    border: 1px solid var(--red);
+    border-radius: 4px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--red);
+    margin-bottom: 10px;
+    letter-spacing: 0.03em;
+  }
+
+  /* Setup notice */
+  .setup-notice {
+    background: #1a1400;
+    border: 1px solid #3a3000;
+    border-radius: 4px;
+    padding: 10px 14px;
+    font-size: 11px;
+    color: var(--amber);
+    margin-bottom: 10px;
+    letter-spacing: 0.03em;
+    line-height: 1.6;
+  }
+
+  /* Success */
+  #success-screen {
+    display: none;
+    padding: 2rem 1rem;
+    text-align: center;
+  }
+
+  .success-icon {
+    width: 64px;
+    height: 64px;
+    border: 1px solid var(--green);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.25rem;
+    box-shadow: 0 0 24px rgba(0,230,118,0.2);
+  }
+
+  .success-icon svg { width: 30px; height: 30px; color: var(--green); }
+
+  #success-screen h2 {
+    font-family: var(--display);
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 8px;
+  }
+
+  #success-detail {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 4px;
+    padding: 0.85rem 1rem;
+    text-align: left;
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 2;
+    margin: 1rem 0 1.5rem;
+  }
+
+  #success-detail span { color: var(--text); }
+
+  .another-btn {
+    background: none;
+    border: 1px solid #1e2a1e;
+    border-radius: 4px;
+    padding: 12px 28px;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+  }
+
+  .another-btn:hover { border-color: var(--green); color: var(--green); }
+
+  .req { color: var(--green); margin-left: 1px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="brand">FOYLESIDE</div>
+    <div class="brand-sub">Car Park &nbsp;·&nbsp; Patrol Log</div>
+  </div>
+  <div class="header-clock">
+    <div class="clock-time" id="clock">--:--</div>
+    <div class="clock-date" id="clock-date"></div>
+  </div>
+</header>
+
+<div class="status-bar">
+  <div class="status-dot"></div>
+  <span id="status-ts">Patrol submission form &nbsp;·&nbsp; Active</span>
+</div>
+
+<main>
+
+  <div class="setup-notice" id="setup-notice">
+    ⚙ SETUP REQUIRED &mdash; Replace <code>YOUR_POWER_AUTOMATE_URL</code> in the script with your Power Automate HTTP trigger URL before going live.
+  </div>
+
+  <div id="form-screen">
+    <div class="error-banner" id="error-banner"></div>
+
+    <!-- Staff -->
+    <div class="card">
+      <div class="card-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        Staff member
+      </div>
+      <div class="field-gap">
+        <select id="staff-select" onchange="handleStaffChange()">
+          <option value="">— select your name —</option>
+          <!-- REPLACE WITH YOUR ACTUAL STAFF NAMES -->
+          <option value="Staff Member 1">Staff Member 1</option>
+          <option value="Staff Member 2">Staff Member 2</option>
+          <option value="Staff Member 3">Staff Member 3</option>
+          <option value="Staff Member 4">Staff Member 4</option>
+          <option value="Staff Member 5">Staff Member 5</option>
+          <!-- END STAFF LIST -->
+          <option value="other">Other / Temporary staff…</option>
+        </select>
+        <div id="other-name-wrap">
+          <input type="text" id="other-name" placeholder="Enter full name" autocomplete="name" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Area -->
+    <div class="card">
+      <div class="card-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/></svg>
+        Area inspected
+      </div>
+      <select id="area-select">
+        <option value="">— select area —</option>
+        <optgroup label="── WEST ──">
+          <option>West Level 1 Checkpoint 1</option>
+          <option>West Level 1 Checkpoint 2</option>
+          <option>West Level 1 Block A</option>
+          <option>West Level 1A Checkpoint 1</option>
+          <option>West Level 1A Checkpoint 2</option>
+          <option>West Level 1A Block A</option>
+          <option>West Level 2 Checkpoint 1</option>
+          <option>West Level 2 Checkpoint 2</option>
+          <option>West Level 2 Block A</option>
+          <option>West Level 2A Checkpoint 1</option>
+          <option>West Level 2A Checkpoint 2</option>
+          <option>West Roof Checkpoint 1</option>
+          <option>West Roof Checkpoint 2</option>
+        </optgroup>
+        <optgroup label="── EAST ──">
+          <option>East Level 1 Checkpoint 1</option>
+          <option>East Level 1 Checkpoint 2</option>
+          <option>East Level 1A Checkpoint 1</option>
+          <option>East Level 1A Checkpoint 2</option>
+          <option>East Level 2 Checkpoint 1</option>
+          <option>East Level 2 Checkpoint 2</option>
+          <option>East Roof Checkpoint 1</option>
+          <option>East Roof Checkpoint 2</option>
+          <option>East Back Fire Escapes</option>
+          <option>East Main Stairwell</option>
+        </optgroup>
+        <optgroup label="── STAIRWELLS ──">
+          <option>Stairwell 11 (Centre)</option>
+          <option>Stairwell Kiosk</option>
+          <option>Stairwell Compound</option>
+          <option>Stairwell Bridge Street</option>
+          <option>Stairwell Orchard</option>
+          <option>Stairwell Coach Park</option>
+        </optgroup>
+        <optgroup label="── LIFTS &amp; ACCESS ──">
+          <option>CP Lift LP7</option>
+          <option>CP Lift LP8</option>
+        </optgroup>
+      </select>
+    </div>
+
+    <!-- Condition -->
+    <div class="card">
+      <div class="card-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Condition <span class="req">*</span>
+      </div>
+      <div class="condition-grid">
+        <button class="cond" id="cond-ok" onclick="setCondition('ok')" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l2.5 2.5L16 9"/></svg>
+          Acceptable
+        </button>
+        <button class="cond" id="cond-warn" onclick="setCondition('warn')" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Requires attention
+        </button>
+        <button class="cond" id="cond-danger" onclick="setCondition('danger')" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Immediate issue
+        </button>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="card">
+      <div class="card-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Notes
+      </div>
+      <textarea id="notes" placeholder="Describe hazards, oil/fluid spills, trip or slip risks, damage, or other observations…"></textarea>
+    </div>
+
+    <!-- Photo -->
+    <div class="card">
+      <div class="card-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        Photo &nbsp;<span style="color:var(--text-dim);font-size:10px;letter-spacing:0.05em">— optional</span>
+      </div>
+      <div class="photo-zone" id="photo-zone">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        <p>Tap to take a photo or upload</p>
+        <small>JPG · PNG · up to 10MB</small>
+        <input type="file" id="photo-input" accept="image/*" capture="environment" onchange="previewPhoto(this)" />
+      </div>
+      <div id="preview-wrap">
+        <img id="preview-img" src="" alt="Preview" />
+        <button id="remove-photo" onclick="clearPhoto()" type="button">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          Remove photo
+        </button>
+      </div>
+    </div>
+
+    <button class="submit-btn" id="submit-btn" onclick="submitForm()" type="button">
+      Submit patrol log
+      <div class="spinner" id="spinner"></div>
+    </button>
+  </div>
+
+  <!-- Success -->
+  <div id="success-screen">
+    <div class="success-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M8 12l2.5 2.5L16 9"/></svg>
+    </div>
+    <h2>Logged</h2>
+    <p style="font-size:12px;color:var(--text-muted);letter-spacing:0.05em">Patrol record saved to the car park log</p>
+    <div id="success-detail"></div>
+    <button class="another-btn" onclick="resetForm()" type="button">+ Log another area</button>
+  </div>
+
+</main>
+
+<script>
+  const POWER_AUTOMATE_URL = 'YOUR_POWER_AUTOMATE_URL';
+
+  let selectedCondition = '';
+  let photoBase64 = '';
+  let photoFilename = '';
+
+  function updateClock() {
+    const now = new Date();
+    const hh = now.getHours().toString().padStart(2, '0');
+    const mm = now.getMinutes().toString().padStart(2, '0');
+    document.getElementById('clock').textContent = hh + ':' + mm;
+    document.getElementById('clock-date').textContent = now.toLocaleDateString('en-GB', {
+      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+    });
+    const ts = now.toLocaleString('en-GB', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit' }).replace(',','');
+    document.getElementById('status-ts').textContent = 'Patrol log active  ·  ' + ts;
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  function handleStaffChange() {
+    const val = document.getElementById('staff-select').value;
+    const wrap = document.getElementById('other-name-wrap');
+    wrap.style.display = val === 'other' ? 'block' : 'none';
+    if (val === 'other') setTimeout(() => document.getElementById('other-name').focus(), 50);
+  }
+
+  function setCondition(val) {
+    selectedCondition = val;
+    const map = { ok: 'ok', warn: 'warn', danger: 'danger' };
+    ['ok', 'warn', 'danger'].forEach(k => {
+      const btn = document.getElementById('cond-' + k);
+      btn.className = 'cond' + (k === val ? ' ' + map[k] : '');
+    });
+  }
+
+  function previewPhoto(input) {
+    if (!input.files || !input.files[0]) return;
+    const file = input.files[0];
+    photoFilename = file.name;
+    const reader = new FileReader();
+    reader.onload = e => {
+      const result = e.target.result;
+      photoBase64 = result.split(',')[1];
+      document.getElementById('preview-img').src = result;
+      document.getElementById('preview-wrap').style.display = 'block';
+      document.getElementById('photo-zone').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function clearPhoto() {
+    photoBase64 = '';
+    photoFilename = '';
+    document.getElementById('photo-input').value = '';
+    document.getElementById('preview-wrap').style.display = 'none';
+    document.getElementById('photo-zone').style.display = 'block';
+  }
+
+  function getStaffName() {
+    const sel = document.getElementById('staff-select').value;
+    return sel === 'other' ? document.getElementById('other-name').value.trim() : sel;
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('error-banner');
+    el.textContent = '⚠ ' + msg;
+    el.style.display = 'block';
+    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function clearError() {
+    document.getElementById('error-banner').style.display = 'none';
+  }
+
+  async function submitForm() {
+    clearError();
+    const staff = getStaffName();
+    const area = document.getElementById('area-select').value;
+    const notes = document.getElementById('notes').value.trim();
+    const now = new Date();
+    const timestamp = now.toISOString();
+    const displayTime = now.toLocaleString('en-GB', {
+      day:'2-digit', month:'2-digit', year:'numeric',
+      hour:'2-digit', minute:'2-digit'
+    }).replace(',', '');
+
+    if (!staff) { showError('Please select or enter your name.'); return; }
+    if (!area)  { showError('Please select the area you inspected.'); return; }
+    if (!selectedCondition) { showError('Please select a condition.'); return; }
+
+    const conditionLabels = { ok: 'Acceptable', warn: 'Requires attention', danger: 'Immediate issue' };
+    const conditionLabel = conditionLabels[selectedCondition];
+
+    const btn = document.getElementById('submit-btn');
+    const spinner = document.getElementById('spinner');
+    btn.disabled = true;
+    spinner.style.display = 'block';
+
+    const payload = {
+      timestamp, displayTime, staff, area,
+      condition: conditionLabel,
+      notes: notes || '',
+      hasPhoto: !!photoBase64,
+      photoBase64: photoBase64 || '',
+      photoFilename: photoFilename || ''
+    };
+
+    try {
+      if (POWER_AUTOMATE_URL === 'YOUR_POWER_AUTOMATE_URL') {
+        await new Promise(r => setTimeout(r, 900));
+        showSuccess(staff, area, conditionLabel, displayTime);
+      } else {
+        const res = await fetch(POWER_AUTOMATE_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error('Server error ' + res.status);
+        showSuccess(staff, area, conditionLabel, displayTime);
+      }
+    } catch (err) {
+      showError('Submission failed — check connection and retry. (' + err.message + ')');
+      btn.disabled = false;
+      spinner.style.display = 'none';
+    }
+  }
+
+  function showSuccess(staff, area, condition, time) {
+    document.getElementById('success-detail').innerHTML =
+      `STAFF &nbsp;&nbsp;&nbsp;: <span>${staff}</span><br>` +
+      `AREA &nbsp;&nbsp;&nbsp;&nbsp;: <span>${area}</span><br>` +
+      `CONDITION: <span>${condition}</span><br>` +
+      `TIME &nbsp;&nbsp;&nbsp;&nbsp;: <span>${time}</span>`;
+    document.getElementById('form-screen').style.display = 'none';
+    document.getElementById('success-screen').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function resetForm() {
+    document.getElementById('staff-select').value = '';
+    document.getElementById('other-name').value = '';
+    document.getElementById('other-name-wrap').style.display = 'none';
+    document.getElementById('area-select').value = '';
+    document.getElementById('notes').value = '';
+    selectedCondition = '';
+    ['ok','warn','danger'].forEach(k => { document.getElementById('cond-' + k).className = 'cond'; });
+    clearPhoto();
+    clearError();
+    document.getElementById('submit-btn').disabled = false;
+    document.getElementById('spinner').style.display = 'none';
+    document.getElementById('form-screen').style.display = 'block';
+    document.getElementById('success-screen').style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>
